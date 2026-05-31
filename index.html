@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Pimenta Doce</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#FAF6F2;color:#2A1A1A;min-height:100vh}
+.pg{display:none;padding:1rem;max-width:440px;margin:0 auto;min-height:100vh}
+.pg.on{display:block}
+.logo{text-align:center;padding:2rem 0 1.25rem}
+.logo h1{font-size:26px;font-weight:600;letter-spacing:1px}
+.logo h1 b{color:#7B0057}
+.logo h1 span{color:#C8003A}
+.logo p{font-size:10px;letter-spacing:3px;color:#B0406A;text-transform:uppercase;margin-top:4px}
+.btn{width:100%;padding:13px;border-radius:10px;border:none;font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px;cursor:pointer;transition:opacity .15s}
+.btn:active{opacity:.82}
+.btn-p{background:#7B0057;color:#fff}
+.btn-r{background:#C8003A;color:#fff}
+.btn-g{background:#EAF3DE;color:#27500A;border:1px solid #97C459}
+.btn-gray{background:#F0EDE8;color:#444;border:1px solid #ccc}
+input,select{width:100%;padding:11px 13px;border-radius:10px;border:1px solid #ddd;background:#fff;color:#2A1A1A;font-size:14px;font-family:inherit;margin-bottom:8px;display:block}
+input:focus,select:focus{outline:none;border-color:#C8003A}
+.lbl{font-size:12px;color:#666;display:block;margin-bottom:3px;margin-top:8px}
+.err{font-size:12px;color:#A32D2D;padding:8px 12px;background:#FCEBEB;border-radius:8px;margin-bottom:8px;display:none}
+.top{display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid #E8D8D0;margin-bottom:14px}
+.top h2{font-size:16px;font-weight:600;color:#2A1A1A}
+.back{font-size:13px;color:#888;background:none;border:none;padding:4px;cursor:pointer;font-family:inherit}
+.sec{font-size:10px;font-weight:700;color:#B0406A;text-transform:uppercase;letter-spacing:.08em;margin:14px 0 7px;display:flex;align-items:center;gap:5px}
+.card{background:#fff;border:1px solid #EEE;border-radius:12px;padding:12px 14px;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.card.q{border-left:3px solid #3B6D11}
+.card.b{border-left:3px solid #BA7517}
+.card.f{border-left:3px solid #888}
+.card.a{border-left:3px solid #A32D2D;opacity:.72}
+.card.cl{border-left:3px solid #7B0057;background:#FFF8FC}
+.av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0}
+.av.q{background:#EAF3DE;color:#27500A}
+.av.b{background:#FAEEDA;color:#633806}
+.av.f{background:#F1EFE8;color:#5F5E5A}
+.av.a{background:#FCEBEB;color:#791F1F}
+.av.c{background:#F4C0D1;color:#7B0057}
+.ci{flex:1;min-width:0}
+.ci .nm{font-size:14px;font-weight:600;color:#2A1A1A}
+.ci .sb{font-size:11px;color:#888;margin-top:2px}
+.pill{font-size:11px;padding:3px 9px;border-radius:999px;font-weight:600;flex-shrink:0}
+.pill.q{background:#EAF3DE;color:#27500A}
+.pill.b{background:#FAEEDA;color:#633806}
+.pill.f{background:#F1EFE8;color:#5F5E5A}
+.pill.a{background:#FCEBEB;color:#791F1F}
+.pill.t-ok{background:#FAEEDA;color:#BA7517}
+.pill.t-warn{background:#FAC775;color:#854F0B}
+.pill.t-over{background:#F7C1C1;color:#791F1F}
+.my{border-radius:14px;padding:16px;text-align:center;margin-bottom:14px}
+.my.f{background:#F1EFE8;border:1px solid #ccc}
+.my.q{background:#EAF3DE;border:1px solid #97C459}
+.my.b{background:#FAEEDA;border:1px solid #EF9F27}
+.my.a{background:#FCEBEB;border:1px solid #F09595}
+.my .mn{font-size:20px;font-weight:700;color:#2A1A1A}
+.my .ms{font-size:13px;color:#666;margin-top:4px}
+.my .mt{font-size:26px;font-weight:700;margin-top:10px}
+.my .mt.ok{color:#BA7517}
+.my .mt.warn{color:#854F0B}
+.my .mt.over{color:#A32D2D}
+.my .ml{font-size:11px;color:#888;margin-top:2px}
+.pref-box{background:#FFF0F5;border:1px solid #ED93B1;border-radius:12px;padding:12px;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.pref-av{width:36px;height:36px;border-radius:50%;background:#F4C0D1;color:#7B0057;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.pref-info .pn{font-size:13px;font-weight:600;color:#7B0057}
+.pref-info .ps{font-size:11px;color:#B0406A;margin-top:2px}
+.agrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.abtn{padding:14px 8px;border-radius:12px;font-size:12px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:6px;border:1px solid #ddd;background:#fff;color:#333;cursor:pointer;transition:transform .1s;font-family:inherit}
+.abtn:active{transform:scale(0.95)}
+.abtn:disabled{opacity:.3;pointer-events:none}
+.abtn .ico{font-size:20px}
+.abtn.ag{background:#EAF3DE;border-color:#97C459;color:#27500A}
+.abtn.ab{background:#FAEEDA;border-color:#EF9F27;color:#633806}
+.abtn.ap{background:#F4C0D1;border-color:#C8003A;color:#7B0057}
+.abtn.ar{background:#FCEBEB;border-color:#F09595;color:#791F1F}
+.modal-bg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100;padding:1rem}
+.modal-bg.on{display:flex}
+.modal-box{background:#fff;border-radius:14px;padding:20px;width:100%;max-width:320px}
+.modal-box h3{font-size:16px;font-weight:700;margin-bottom:8px;color:#2A1A1A}
+.modal-box p{font-size:13px;color:#666;line-height:1.6;margin-bottom:16px}
+.tabs{display:flex;border:1px solid #ddd;border-radius:10px;overflow:hidden;margin-bottom:14px}
+.tab{flex:1;padding:10px;font-size:13px;font-weight:600;border:none;background:transparent;color:#888;cursor:pointer;font-family:inherit;transition:all .15s}
+.tab.on{background:#7B0057;color:#fff}
+.rtabs{display:flex;border:1px solid #ddd;border-radius:10px;overflow:hidden;margin-bottom:14px}
+.rtab{flex:1;padding:10px 4px;font-size:12px;font-weight:600;border:none;background:transparent;color:#888;cursor:pointer;font-family:inherit}
+.rtab.on{background:#7B0057;color:#fff}
+.add-row{display:flex;gap:6px;margin-bottom:8px;align-items:stretch}
+.add-row input,.add-row select{flex:1;margin:0;font-size:12px;padding:9px 10px}
+.add-row .addbtn{padding:9px 12px;border-radius:10px;border:none;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit}
+.addbtn.green{background:#EAF3DE;color:#27500A}
+.addbtn.pink{background:#F4C0D1;color:#7B0057}
+.ibtn{padding:4px 9px;border-radius:6px;font-size:11px;font-weight:600;border:1px solid #ddd;background:transparent;color:#666;cursor:pointer;margin-right:4px;margin-top:4px;font-family:inherit}
+.ibtn:active{opacity:.7}
+.ibtn.g{background:#EAF3DE;border-color:#97C459;color:#27500A}
+.ibtn.y{background:#FAEEDA;border-color:#EF9F27;color:#633806}
+.ibtn.r{background:#FCEBEB;border-color:#F09595;color:#791F1F}
+.ibtn.gr{background:#F1EFE8;border-color:#ccc;color:#555}
+.ibtn.del{background:#FCEBEB;border-color:#F09595;color:#791F1F}
+.metric-g{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.metric{background:#F5F0EC;border-radius:10px;padding:12px;text-align:center}
+.metric .val{font-size:24px;font-weight:700;color:#C8003A}
+.metric .lab{font-size:11px;color:#888;margin-top:2px}
+.prog-wrap{margin-bottom:14px}
+.prog-label{display:flex;justify-content:space-between;font-size:12px;color:#888;margin-bottom:4px}
+.prog-bar{height:8px;background:#E8D8D0;border-radius:999px;overflow:hidden}
+.prog-fill{height:100%;background:#C8003A;border-radius:999px;transition:width .4s}
+.rank-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #F0E8E4}
+.divider{border:none;border-top:1px solid #EEE;margin:12px 0}
+.note{font-size:11px;color:#888;background:#F5F0EC;border-radius:8px;padding:8px 12px;margin-bottom:10px;line-height:1.5}
+.empty{text-align:center;color:#aaa;font-size:13px;padding:16px}
+.spinner{text-align:center;padding:40px;color:#B0406A;font-size:14px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2A1A1A;color:#fff;padding:10px 18px;border-radius:999px;font-size:13px;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- LOGIN -->
+<div id="p-login" class="pg on">
+  <div class="logo">
+    <div style="font-size:38px">💅</div>
+    <h1><b>PIMENTA</b> <span>DOCE</span></h1>
+    <p>Esmalteria &amp; Escova Express</p>
+  </div>
+  <div class="note">Primeira vez? Clique em "Sou atendente" para criar seu acesso.</div>
+  <button class="btn btn-p" onclick="pg('p-rec-pass')">🔒 Recepção</button>
+  <button class="btn btn-r" onclick="pg('p-att-entry')">✂️ Sou atendente</button>
+</div>
+
+<!-- REC PASS -->
+<div id="p-rec-pass" class="pg">
+  <div class="top"><h2>Recepção</h2><button class="back" onclick="pg('p-login')">← Voltar</button></div>
+  <span class="lbl">Senha</span>
+  <input type="password" id="rpass" placeholder="Digite a senha...">
+  <div class="err" id="rpass-err">Senha incorreta.</div>
+  <button class="btn btn-p" onclick="checkRec()">Entrar</button>
+</div>
+
+<!-- ATT ENTRY -->
+<div id="p-att-entry" class="pg">
+  <div class="top"><h2>Atendente</h2><button class="back" onclick="pg('p-login')">← Voltar</button></div>
+  <div class="tabs">
+    <button class="tab on" onclick="switchTab('e')">Entrar</button>
+    <button class="tab" onclick="switchTab('c')">Criar acesso</button>
+  </div>
+  <div id="form-e">
+    <span class="lbl">Seu nome</span>
+    <input id="li-name" type="text" placeholder="Ex: Ana Paula...">
+    <span class="lbl">Senha</span>
+    <input id="li-pass" type="password" placeholder="Sua senha...">
+    <div class="err" id="li-err">Nome ou senha incorretos.</div>
+    <button class="btn btn-r" onclick="loginAtt()">Entrar</button>
+  </div>
+  <div id="form-c" style="display:none">
+    <span class="lbl">Seu nome</span>
+    <input id="reg-name" type="text" placeholder="Ex: Ana Paula..." maxlength="20">
+    <span class="lbl">Criar senha (mínimo 4 caracteres)</span>
+    <input id="reg-pass" type="password" placeholder="Crie sua senha...">
+    <span class="lbl">Confirmar senha</span>
+    <input id="reg-pass2" type="password" placeholder="Repita a senha...">
+    <div class="err" id="reg-err"></div>
+    <button class="btn btn-r" onclick="registerAtt()">Criar meu acesso</button>
+  </div>
+</div>
+
+<!-- ATENDENTE -->
+<div id="p-att" class="pg">
+  <div class="top">
+    <div>
+      <h2 id="att-hello">Olá!</h2>
+      <div style="font-size:10px;color:#B0406A;text-transform:uppercase;letter-spacing:1px">Pimenta Doce</div>
+    </div>
+    <button class="back" onclick="attLogout()">Sair →</button>
+  </div>
+  <div class="modal-bg" id="modal-leave">
+    <div class="modal-box">
+      <h3>⚠️ Sair da fila?</h3>
+      <p>Você ficará marcada como <strong>ausente</strong>. Sua posição <strong>não pode ser recuperada</strong>. Quando voltar, precisará entrar no final da fila.</p>
+      <button class="btn btn-r" style="margin-bottom:8px" onclick="confirmLeave()">Sim, sair da fila</button>
+      <button class="btn btn-gray" onclick="G('modal-leave').classList.remove('on')">Cancelar</button>
+    </div>
+  </div>
+  <div id="att-body">
+    <div class="my f" id="my-card">
+      <div class="mn" id="my-name"></div>
+      <div class="ms" id="my-st"></div>
+      <div class="mt ok" id="my-timer" style="display:none"></div>
+      <div class="ml" id="my-tlab" style="display:none"></div>
+    </div>
+    <div class="pref-box" id="pref-box" style="display:none">
+      <div class="pref-av">❤️</div>
+      <div class="pref-info">
+        <div class="pn" id="pref-cname"></div>
+        <div class="ps" id="pref-cserv"></div>
+      </div>
+    </div>
+    <div class="agrid">
+      <button class="abtn ap" id="ab-join" onclick="joinQ()"><span class="ico">📋</span>Entrar na fila</button>
+      <button class="abtn ar" id="ab-leave" onclick="G('modal-leave').classList.add('on')"><span class="ico">🚪</span>Sair da fila</button>
+      <button class="abtn ab" id="ab-start" onclick="startA()"><span class="ico">✂️</span>Iniciar atend.</button>
+      <button class="abtn ag" id="ab-end" onclick="endA()"><span class="ico">✅</span>Fim atend.</button>
+    </div>
+    <div class="sec">📋 Fila de atendentes</div>
+    <div id="att-fila"></div>
+    <div class="sec">👥 Status da equipe</div>
+    <div id="att-equipe"></div>
+  </div>
+</div>
+
+<!-- RECEPCAO -->
+<div id="p-rec" class="pg">
+  <div class="top">
+    <div>
+      <h2>Recepção</h2>
+      <div style="font-size:10px;color:#B0406A;text-transform:uppercase;letter-spacing:1px">Pimenta Doce</div>
+    </div>
+    <button class="back" onclick="pg('p-login')">Sair →</button>
+  </div>
+  <div class="rtabs">
+    <button class="rtab on" onclick="switchRTab('cl')">🧴 Clientes</button>
+    <button class="rtab" onclick="switchRTab('eq')">👥 Equipe</button>
+    <button class="rtab" onclick="switchRTab('nm')">📊 Números</button>
+  </div>
+
+  <div id="rec-cl">
+    <div class="sec">👥 Fila de clientes</div>
+    <div class="add-row">
+      <input id="cl-n" type="text" placeholder="Nome da cliente">
+      <select id="cl-s"><option value="">Serviço...</option><option>Manicure</option><option>Pedicure</option><option>Manicure + Pedicure</option><option>Alongamento</option><option>Spa dos pés</option><option>Escova</option><option>Depilação</option></select>
+      <button class="addbtn green" onclick="addClient()">+ Add</button>
+    </div>
+    <div id="cl-list"><div class="spinner">Carregando...</div></div>
+
+    <div class="divider"></div>
+    <div class="sec">❤️ Cliente preferencial</div>
+    <div class="note">Entra na fila geral com destaque para a atendente escolhida.</div>
+    <div class="add-row">
+      <select id="pref-att"><option value="">Atendente...</option></select>
+      <input id="pref-cn" type="text" placeholder="Nome da cliente">
+    </div>
+    <div class="add-row">
+      <select id="pref-cs"><option value="">Serviço...</option><option>Manicure</option><option>Pedicure</option><option>Manicure + Pedicure</option><option>Alongamento</option><option>Spa dos pés</option><option>Escova</option><option>Depilação</option></select>
+      <button class="addbtn pink" onclick="addPrefClient()">❤ Add</button>
+    </div>
+
+    <div class="divider"></div>
+    <div class="sec">⏱️ Cronômetros ativos</div>
+    <div class="add-row" style="align-items:center">
+      <span style="font-size:12px;color:#888;white-space:nowrap">Duração padrão:</span>
+      <input id="def-min" type="number" value="40" min="1" max="120" style="width:60px;flex:none">
+      <span style="font-size:12px;color:#888">min</span>
+    </div>
+    <div id="timer-list"></div>
+  </div>
+
+  <div id="rec-eq" style="display:none">
+    <div class="sec">📋 Fila de atendentes</div>
+    <div id="rec-fila"></div>
+    <div class="sec">👥 Todas as atendentes</div>
+    <div id="rec-team"></div>
+    <div style="text-align:right;margin-top:8px">
+      <button class="ibtn r" onclick="toggleResetBox()">🔑 Resetar senha</button>
+    </div>
+    <div id="reset-box" style="display:none;background:#F5F0EC;border-radius:12px;padding:14px;margin-top:10px">
+      <span class="lbl">Atendente</span>
+      <select id="reset-sel"></select>
+      <span class="lbl">Nova senha</span>
+      <input id="reset-np" type="password" placeholder="Nova senha...">
+      <div class="err" id="reset-err"></div>
+      <button class="btn btn-p" style="margin-top:4px" onclick="doReset()">Resetar senha</button>
+    </div>
+  </div>
+
+  <div id="rec-nm" style="display:none">
+    <div class="sec">📊 Atendimentos hoje</div>
+    <div class="metric-g" id="metric-g"></div>
+    <div class="sec">🎯 Meta do dia</div>
+    <div class="prog-wrap" id="meta-prog"></div>
+    <div class="add-row" style="align-items:center;margin-bottom:14px">
+      <span style="font-size:12px;color:#888">Meta:</span>
+      <input id="meta-val" type="number" value="30" min="1" max="200" style="width:60px;flex:none">
+      <span style="font-size:12px;color:#888">atend.</span>
+      <button class="ibtn gr" onclick="renderNumbers()">Ok</button>
+    </div>
+    <div class="divider"></div>
+    <div class="sec">🏆 Ranking da semana</div>
+    <div id="ranking"></div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL='https://mbeknpahclxfswyjdvwc.supabase.co';
+const SUPABASE_KEY='sb_publishable_VhOpbds7JnJfxkVQepzmRA_mGviqmhw';
+const REC_PASS='140400';
+
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let curId=null,ticker=null,channel=null;
+
+function G(id){return document.getElementById(id)}
+function pg(id){document.querySelectorAll('.pg').forEach(x=>x.classList.remove('on'));G(id).classList.add('on')}
+function ini(n){return n.slice(0,2).toUpperCase()}
+function fmtT(ms){if(ms<=0)return'Esgotado';const m=Math.floor(ms/60000),s=Math.floor((ms%60000)/1000);return m+'m '+String(s).padStart(2,'0')+'s'}
+function tcls(rem,tot){if(rem<=0)return'over';if(rem<tot*0.2)return'warn';return'ok'}
+function toast(msg){const t=G('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+
+function switchTab(t){
+  G('form-e').style.display=t==='e'?'block':'none';
+  G('form-c').style.display=t==='c'?'block':'none';
+  document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('on',(i===0&&t==='e')||(i===1&&t==='c')));
+}
+
+function switchRTab(t){
+  G('rec-cl').style.display=t==='cl'?'block':'none';
+  G('rec-eq').style.display=t==='eq'?'block':'none';
+  G('rec-nm').style.display=t==='nm'?'block':'none';
+  document.querySelectorAll('.rtab').forEach((b,i)=>b.classList.toggle('on',['cl','eq','nm'][i]===t));
+  if(t==='eq')renderEquipe();
+  if(t==='nm')renderNumbers();
+}
+
+async function checkRec(){
+  if(G('rpass').value===REC_PASS){
+    G('rpass-err').style.display='none';
+    pg('p-rec');
+    await loadRecData();
+    startTick();
+    subscribeAll();
+  }else G('rpass-err').style.display='block';
+}
+
+async function registerAtt(){
+  const name=G('reg-name').value.trim(),pass=G('reg-pass').value,pass2=G('reg-pass2').value;
+  const err=G('reg-err');
+  if(!name){err.style.display='block';err.textContent='Digite seu nome.';return}
+  if(pass.length<4){err.style.display='block';err.textContent='Senha precisa ter pelo menos 4 caracteres.';return}
+  if(pass!==pass2){err.style.display='block';err.textContent='As senhas não coincidem.';return}
+  const{data:exists}=await sb.from('professionals').select('id').ilike('name',name).maybeSingle();
+  if(exists){err.style.display='block';err.textContent='Esse nome já existe. Escolha outro.';return}
+  err.style.display='none';
+  const{data,error}=await sb.from('professionals').insert({name,pass_hash:pass,status:'free',queue_order:null,free_at:new Date().toISOString(),count_today:0,count_week:0}).select().single();
+  if(error){err.style.display='block';err.textContent='Erro ao criar acesso. Tente novamente.';return}
+  curId=data.id;
+  pg('p-att');
+  await renderAtt();
+  startTick();
+  subscribeAll();
+  toast('Acesso criado! Bem-vinda, '+name+'!');
+}
+
+async function loginAtt(){
+  const name=G('li-name').value.trim(),pass=G('li-pass').value;
+  const{data,error}=await sb.from('professionals').select('*').ilike('name',name).eq('pass_hash',pass).maybeSingle();
+  if(!data||error){G('li-err').style.display='block';return}
+  G('li-err').style.display='none';
+  curId=data.id;
+  pg('p-att');
+  await renderAtt();
+  startTick();
+  subscribeAll();
+}
+
+function attLogout(){curId=null;if(ticker){clearInterval(ticker);ticker=null}if(channel)channel.unsubscribe();pg('p-login')}
+
+async function getQueue(){
+  const{data}=await sb.from('professionals').select('*').eq('status','queue').order('queue_order');
+  return data||[];
+}
+
+async function nextPos(){
+  const{data}=await sb.from('professionals').select('queue_order').eq('status','queue').order('queue_order',{ascending:false}).limit(1);
+  return data&&data.length?data[0].queue_order+1:1;
+}
+
+async function joinQ(id){
+  const pid=id||curId;if(!pid)return;
+  const{data:p}=await sb.from('professionals').select('*').eq('id',pid).single();
+  if(!p||p.status==='queue'||p.status==='busy')return;
+  const pos=await nextPos();
+  await sb.from('professionals').update({status:'queue',queue_order:pos,free_at:null}).eq('id',pid);
+  if(!id)await renderAtt();else await renderEquipe();
+}
+
+async function confirmLeave(){
+  G('modal-leave').classList.remove('on');
+  const{data:p}=await sb.from('professionals').select('*').eq('id',curId).single();
+  if(!p||p.status!=='queue')return;
+  const op=p.queue_order;
+  await sb.from('professionals').update({status:'absent',queue_order:null,free_at:null}).eq('id',curId);
+  const{data:others}=await sb.from('professionals').select('id,queue_order').eq('status','queue').gt('queue_order',op);
+  if(others)for(const o of others)await sb.from('professionals').update({queue_order:o.queue_order-1}).eq('id',o.id);
+  await renderAtt();
+}
+
+async function leaveQRec(id){
+  const{data:p}=await sb.from('professionals').select('*').eq('id',id).single();
+  if(!p||p.status!=='queue')return;
+  const op=p.queue_order;
+  await sb.from('professionals').update({status:'absent',queue_order:null,free_at:null}).eq('id',id);
+  const{data:others}=await sb.from('professionals').select('id,queue_order').eq('status','queue').gt('queue_order',op);
+  if(others)for(const o of others)await sb.from('professionals').update({queue_order:o.queue_order-1}).eq('id',o.id);
+  await renderEquipe();
+}
+
+async function startA(id){
+  const pid=id||curId;if(!pid)return;
+  const{data:p}=await sb.from('professionals').select('*').eq('id',pid).single();
+  if(!p||p.status==='busy')return;
+  if(p.status==='queue'){
+    const op=p.queue_order;
+    const{data:others}=await sb.from('professionals').select('id,queue_order').eq('status','queue').gt('queue_order',op);
+    if(others)for(const o of others)await sb.from('professionals').update({queue_order:o.queue_order-1}).eq('id',o.id);
+  }
+  const mins=parseInt(G('def-min')?.value)||40;
+  const endTime=new Date(Date.now()+mins*60000).toISOString();
+  await sb.from('professionals').update({status:'busy',queue_order:null,free_at:null,timer_end:endTime,timer_mins:mins}).eq('id',pid);
+  if(!id)await renderAtt();else await renderEquipe();
+}
+
+async function endA(id){
+  const pid=id||curId;if(!pid)return;
+  const{data:p}=await sb.from('professionals').select('*').eq('id',pid).single();
+  if(!p||p.status!=='busy')return;
+  await sb.from('professionals').update({status:'free',free_at:new Date().toISOString(),timer_end:null,timer_mins:null,count_today:p.count_today+1,count_week:p.count_week+1,pref_client:null,pref_service:null}).eq('id',pid);
+  if(!id)await renderAtt();else await renderEquipe();
+}
+
+async function renderAtt(){
+  if(!curId)return;
+  const{data:me}=await sb.from('professionals').select('*').eq('id',curId).single();
+  if(!me)return;
+  G('att-hello').textContent='Olá, '+me.name+'!';
+  G('my-name').textContent=me.name;
+  const mc=G('my-card');
+  mc.className='my '+(me.status==='absent'?'a':me.status==='queue'?'q':me.status==='busy'?'b':'f');
+  const stMap={free:'Livre — aguardando',busy:'Em atendimento',queue:me.queue_order+'º na fila',absent:'Ausente — entre na fila quando voltar'};
+  G('my-st').textContent=stMap[me.status]||'';
+  const td=G('my-timer'),tl=G('my-tlab');
+  if(me.status==='busy'&&me.timer_end){
+    const rem=new Date(me.timer_end)-Date.now();
+    const cls=tcls(rem,me.timer_mins*60000);
+    td.textContent=fmtT(rem);td.className='mt '+cls;td.style.display='block';
+    tl.textContent=rem<=0?'Tempo esgotado!':'Tempo restante';tl.style.display='block';
+  }else{td.style.display='none';tl.style.display='none'}
+  const pb=G('pref-box');
+  if(me.pref_client){
+    pb.style.display='flex';
+    G('pref-cname').textContent=me.pref_client+' aguardando você';
+    G('pref-cserv').textContent=(me.pref_service||'')+' · cliente preferencial';
+  }else pb.style.display='none';
+  G('ab-join').disabled=me.status==='queue'||me.status==='busy';
+  G('ab-leave').disabled=me.status!=='queue';
+  G('ab-start').disabled=me.status==='busy'||me.status==='absent';
+  G('ab-end').disabled=me.status!=='busy';
+  const{data:allPros}=await sb.from('professionals').select('*').order('queue_order');
+  const queue=(allPros||[]).filter(p=>p.status==='queue');
+  const now=Date.now();
+  G('att-fila').innerHTML=queue.length?queue.map(p=>`<div class="card q"><span style="font-size:13px;font-weight:700;color:#3B6D11;min-width:20px">${p.queue_order}º</span><div class="av q">${ini(p.name)}</div><div class="ci"><div class="nm">${p.name}${p.id===curId?' (você)':''}</div></div></div>`).join(''):'<div class="empty">Fila vazia</div>';
+  G('att-equipe').innerHTML=(allPros||[]).map(p=>{
+    const rem=p.timer_end?new Date(p.timer_end)-now:0;
+    const pill=p.status==='busy'&&p.timer_end?`<span class="pill t-${tcls(rem,p.timer_mins*60000)}">${fmtT(rem)}</span>`:`<span class="pill ${p.status}">${p.status==='free'?'Livre':p.status==='busy'?'Ocupada':p.status==='absent'?'Ausente':p.queue_order+'º fila'}</span>`;
+    return`<div class="card ${p.status}"><div class="av ${p.status}">${ini(p.name)}</div><div class="ci"><div class="nm">${p.name}${p.id===curId?' (você)':''}</div><div class="sb">${p.status==='free'?'Livre':p.status==='busy'?'Em atendimento':p.status==='absent'?'Ausente':p.queue_order+'º na fila'}</div></div>${pill}</div>`;
+  }).join('')||'<div class="empty">Nenhuma conectada</div>';
+}
+
+async function loadRecData(){
+  const{data:pros}=await sb.from('professionals').select('*');
+  const pa=G('pref-att');
+  if(pa)pa.innerHTML='<option value="">Atendente...</option>'+(pros||[]).map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+  await renderClients();
+  await renderTimers();
+}
+
+async function renderClients(){
+  const{data:clients}=await sb.from('clients').select('*,professionals(name)').order('created_at');
+  const cl=G('cl-list');
+  if(!cl)return;
+  cl.innerHTML=(clients||[]).length?(clients||[]).map((c,i)=>`
+    <div class="card ${c.pref_att?'cl':'f'}">
+      <span style="font-size:13px;font-weight:700;color:#888;min-width:18px">${i+1}</span>
+      <div class="av c">${ini(c.name)}</div>
+      <div class="ci"><div class="nm">${c.name}</div><div class="sb">${c.service}</div></div>
+      ${c.pref_att?`<span class="pill" style="background:#F4C0D1;color:#7B0057">${c.professionals?.name||''}</span>`:''}
+      <button class="ibtn del" onclick="rmClient('${c.id}','${c.pref_att||''}')">🗑</button>
+    </div>`).join(''):'<div class="empty">Nenhuma cliente na fila</div>';
+}
+
+async function renderTimers(){
+  const now=Date.now();
+  const{data:pros}=await sb.from('professionals').select('*').eq('status','busy').not('timer_end','is',null);
+  const tl=G('timer-list');if(!tl)return;
+  tl.innerHTML=(pros||[]).length?(pros||[]).map(p=>{
+    const rem=new Date(p.timer_end)-now;const cls=tcls(rem,p.timer_mins*60000);
+    return`<div class="card b" style="background:#FAEEDA;border-color:#EF9F27">
+      <div class="av b">${ini(p.name)}</div>
+      <div class="ci"><div class="nm">${p.name}</div><div class="sb">${p.timer_mins}min total</div></div>
+      <span class="pill t-${cls}">${fmtT(rem)}</span>
+    </div>`;
+  }).join(''):'<div class="empty">Nenhuma em atendimento</div>';
+}
+
+async function renderEquipe(){
+  const{data:pros}=await sb.from('professionals').select('*').order('queue_order');
+  const rs=G('reset-sel');
+  if(rs)rs.innerHTML=(pros||[]).map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+  const pa=G('pref-att');
+  if(pa)pa.innerHTML='<option value="">Atendente...</option>'+(pros||[]).map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+  const now=Date.now();
+  const queue=(pros||[]).filter(p=>p.status==='queue');
+  const rf=G('rec-fila');
+  if(rf)rf.innerHTML=queue.length?queue.map(p=>`
+    <div class="card q">
+      <span style="font-size:13px;font-weight:700;color:#3B6D11;min-width:18px">${p.queue_order}º</span>
+      <div class="av q">${ini(p.name)}</div>
+      <div class="ci"><div class="nm">${p.name}</div>
+      <div style="margin-top:5px">
+        <button class="ibtn g" onclick="joinQ('${p.id}')">Fila</button>
+        <button class="ibtn r" onclick="leaveQRec('${p.id}')">Sair</button>
+        <button class="ibtn y" onclick="startA('${p.id}')">Iniciar</button>
+        <button class="ibtn gr" onclick="endA('${p.id}')">Fim</button>
+      </div></div>
+      <span class="pill q">Fila</span>
+    </div>`).join(''):'<div class="empty">Fila vazia</div>';
+  const rt=G('rec-team');
+  if(rt)rt.innerHTML=(pros||[]).map(p=>{
+    const rem=p.timer_end?new Date(p.timer_end)-now:0;
+    const pill=p.status==='busy'&&p.timer_end?`<span class="pill t-${tcls(rem,p.timer_mins*60000)}">${fmtT(rem)}</span>`:`<span class="pill ${p.status}">${p.status==='free'?'Livre':p.status==='busy'?'Ocupada':p.status==='absent'?'Ausente':p.queue_order+'º fila'}</span>`;
+    return`<div class="card ${p.status}">
+      <div class="av ${p.status}">${ini(p.name)}</div>
+      <div class="ci"><div class="nm">${p.name}</div><div class="sb">${p.status==='free'?'Livre':p.status==='busy'?'Em atendimento':p.status==='absent'?'Ausente':p.queue_order+'º na fila'} · ${p.count_today||0} hoje</div>
+      <div style="margin-top:5px">
+        <button class="ibtn g" onclick="joinQ('${p.id}')">Fila</button>
+        <button class="ibtn r" onclick="leaveQRec('${p.id}')">Sair</button>
+        <button class="ibtn y" onclick="startA('${p.id}')">Iniciar</button>
+        <button class="ibtn gr" onclick="endA('${p.id}')">Fim</button>
+      </div></div>
+      ${pill}
+    </div>`;
+  }).join('')||'<div class="empty">Nenhuma cadastrada</div>';
+}
+
+async function renderNumbers(){
+  const{data:pros}=await sb.from('professionals').select('*');
+  const mg=G('metric-g');
+  if(mg)mg.innerHTML=(pros||[]).length?(pros||[]).map(p=>`<div class="metric"><div class="val">${p.count_today||0}</div><div class="lab">${p.name}</div></div>`).join(''):'<div style="grid-column:span 2" class="empty">Nenhuma cadastrada</div>';
+  const meta=parseInt(G('meta-val')?.value)||30;
+  const total=(pros||[]).reduce((s,p)=>s+(p.count_today||0),0);
+  const pct=Math.min(100,Math.round(total/meta*100));
+  const mp=G('meta-prog');
+  if(mp)mp.innerHTML=`<div class="prog-label"><span>${total} de ${meta} atendimentos</span><span>${pct}%</span></div><div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>`;
+  const rk=G('ranking');
+  if(rk){const sorted=(pros||[]).sort((a,b)=>(b.count_week||0)-(a.count_week||0));rk.innerHTML=sorted.length?sorted.map((p,i)=>`<div class="rank-row"><span style="font-size:14px;font-weight:700;color:#C8003A;min-width:20px">${i+1}º</span><span style="flex:1;font-size:14px">${p.name}</span><span style="font-size:14px;font-weight:700">${p.count_week||0} atend.</span></div>`).join(''):'<div class="empty">Sem dados</div>'}
+}
+
+async function addClient(){
+  const n=G('cl-n').value.trim(),s=G('cl-s').value;
+  if(!n||!s){toast('Preencha nome e serviço');return}
+  await sb.from('clients').insert({name:n,service:s,pref_att:null});
+  G('cl-n').value='';G('cl-s').value='';
+  await renderClients();
+}
+
+async function addPrefClient(){
+  const attId=G('pref-att').value,n=G('pref-cn').value.trim(),s=G('pref-cs').value;
+  if(!attId||!n||!s){toast('Preencha todos os campos');return}
+  await sb.from('clients').insert({name:n,service:s,pref_att:attId});
+  await sb.from('professionals').update({pref_client:n,pref_service:s}).eq('id',attId);
+  G('pref-cn').value='';G('pref-att').value='';G('pref-cs').value='';
+  await renderClients();
+  toast('Cliente preferencial adicionada!');
+}
+
+async function rmClient(cid,prefAtt){
+  if(prefAtt)await sb.from('professionals').update({pref_client:null,pref_service:null}).eq('id',prefAtt);
+  await sb.from('clients').delete().eq('id',cid);
+  await renderClients();
+}
+
+function toggleResetBox(){const rb=G('reset-box');rb.style.display=rb.style.display==='none'?'block':'none'}
+
+async function doReset(){
+  const id=G('reset-sel').value,pass=G('reset-np').value,err=G('reset-err');
+  if(pass.length<4){err.style.display='block';err.textContent='Mínimo 4 caracteres.';return}
+  await sb.from('professionals').update({pass_hash:pass}).eq('id',id);
+  err.style.display='none';G('reset-np').value='';G('reset-box').style.display='none';
+  toast('Senha resetada com sucesso!');
+}
+
+function subscribeAll(){
+  channel=sb.channel('realtime-all')
+    .on('postgres_changes',{event:'*',schema:'public',table:'professionals'},async()=>{
+      if(curId&&G('p-att').classList.contains('on'))await renderAtt();
+      if(G('p-rec').classList.contains('on')){await renderTimers();await renderEquipe()}
+    })
+    .on('postgres_changes',{event:'*',schema:'public',table:'clients'},async()=>{
+      if(G('p-rec').classList.contains('on'))await renderClients();
+    })
+    .subscribe();
+}
+
+function startTick(){
+  if(ticker)return;
+  ticker=setInterval(async()=>{
+    if(curId&&G('p-att').classList.contains('on'))await renderAtt();
+    if(G('p-rec').classList.contains('on'))await renderTimers();
+  },5000);
+}
+
+G('rpass').onkeydown=e=>{if(e.key==='Enter')checkRec()};
+G('li-pass').onkeydown=e=>{if(e.key==='Enter')loginAtt()};
+</script>
+</body>
+</html>
